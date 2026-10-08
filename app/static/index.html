@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CivicCare AI — Civic Reporting & Urban Intelligence</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="toast" aria-live="polite"></div>
+
+<section id="auth" class="auth-shell">
+  <div class="auth-brand"><span class="brand-mark">C</span><span>CivicCare <b>AI</b></span></div>
+  <div class="auth-layout">
+    <div class="auth-intro">
+      <span class="eyebrow">PUBLIC URBAN INTELLIGENCE</span>
+      <h1>Understand your area.<br><em>Report what matters.</em></h1>
+      <p>Explore current conditions, see accident-risk evidence, report civic issues and keep track of your own submissions.</p>
+      <div class="intro-points">
+        <div><span>01</span><b>Explore</b><small>Live map, weather and traffic context</small></div>
+        <div><span>02</span><b>Report</b><small>Submit a civic issue with location and evidence</small></div>
+        <div><span>03</span><b>Track</b><small>Follow your submitted reports</small></div>
+      </div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs"><button class="active" data-auth="login">Sign in</button><button data-auth="register">Create account</button></div>
+      <form id="loginForm">
+        <div class="form-title"><span class="eyebrow">SECURE ACCESS</span><h2>Choose your workspace</h2><p id="loginHelp">Select Citizen for public reporting or Authority for department operations.</p></div>
+        <label>Who are you?
+          <select id="loginRole" name="role" class="auth-select" required>
+            <option value="citizen">Citizen</option>
+            <option value="authority">Authority</option>
+          </select>
+        </label>
+        <div id="authoritySelector" class="authority-selector hidden">
+          <label>Select authority department
+            <select id="authorityDepartment" name="department" class="auth-select">
+              <option value="Roads">Roads Department</option>
+              <option value="Traffic">Traffic Department</option>
+              <option value="Water">Water Department</option>
+              <option value="Sanitation">Sanitation Department</option>
+              <option value="Electrical">Electrical Department</option>
+              <option value="Disaster Management">Disaster Management</option>
+              <option value="Emergency">Emergency Services</option>
+              <option value="General Services">General Services</option>
+            </select>
+          </label>
+        </div>
+        <label>Email<input id="loginEmail" name="email" type="email" placeholder="you@example.com" required></label>
+        <label>Password<input id="loginPassword" name="password" type="password" placeholder="Your password" required></label>
+        <button class="primary wide" id="loginSubmit">Continue</button>
+      </form>
+      <div id="authError" class="auth-error hidden" role="alert"></div>
+      <div class="demo-access" id="demoAccess">
+        <div class="demo-access-head"><div><span class="eyebrow">DEMO ACCESS</span><h3>Authority login</h3><p>Use a department account to see exactly where citizen complaints are received.</p></div><span class="demo-lock">STAFF</span></div>
+        <div class="demo-accounts">
+          <button type="button" class="demo-account" data-demo-email="roads@civiccare.local" data-demo-password="Authority@123"><b>Roads</b><small>roads@civiccare.local</small></button>
+          <button type="button" class="demo-account" data-demo-email="traffic@civiccare.local" data-demo-password="Authority@123"><b>Traffic</b><small>traffic@civiccare.local</small></button>
+          <button type="button" class="demo-account" data-demo-email="water@civiccare.local" data-demo-password="Authority@123"><b>Water</b><small>water@civiccare.local</small></button>
+          <button type="button" class="demo-account" data-demo-email="sanitation@civiccare.local" data-demo-password="Authority@123"><b>Sanitation</b><small>sanitation@civiccare.local</small></button>
+          <button type="button" class="demo-account" data-demo-email="electrical@civiccare.local" data-demo-password="Authority@123"><b>Electrical</b><small>electrical@civiccare.local</small></button>
+          <button type="button" class="demo-account" data-demo-email="disaster@civiccare.local" data-demo-password="Authority@123"><b>Disaster</b><small>disaster@civiccare.local</small></button>
+        </div>
+        <div class="demo-note">Click a department to fill the sign-in form, then continue. Authority accounts can only access their assigned department queue.</div>
+        <button type="button" class="portal-link" id="authorityPortal">Open Authority Portal →</button>
+      </div>
+      <form id="registerForm" class="hidden">
+        <div class="form-title"><span class="eyebrow">GET STARTED</span><h2>Create your account</h2><p>Use your account to submit and track civic reports.</p></div>
+        <label>Name<input name="name" autocomplete="name" placeholder="Your name" required></label>
+        <label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+        <label>Password<input name="password" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters" required></label>
+        <button class="primary wide">Create account</button>
+      </form>
+    </div>
+  </div>
+  <div class="auth-foot">CivicCare AI · Public civic intelligence · Live and historical data are clearly separated</div>
+</section>
+
+<section id="app" class="app-shell hidden">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><span class="brand-mark">C</span><span>CivicCare <b>AI</b></span></div>
+    <div class="workspace-label"><span></span><b id="workspaceLabel">CITIZEN WORKSPACE</b></div>
+    <nav class="main-nav">
+      <button data-page="home" class="nav active"><span class="nav-icon">⌂</span><span>Home</span></button>
+      <button data-page="live-map" class="nav citizen-only"><span class="nav-icon">⌖</span><span>Live map</span></button>
+      <button data-page="report" class="nav citizen-only"><span class="nav-icon">＋</span><span>Report issue</span></button>
+      <button data-page="reports" class="nav citizen-only"><span class="nav-icon">✓</span><span>My reports</span></button>
+      <button data-page="authority-portal" class="nav staff-only hidden"><span class="nav-icon">▣</span><span>Authority portal</span></button><button data-page="authority" class="nav role-authority hidden"><span class="nav-icon">▣</span><span>Authority desk</span></button>
+      <button data-page="admin-config" class="nav role-admin hidden"><span class="nav-icon">⚙</span><span>System configuration</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="account-mini"><span id="userAvatar">C</span><div><b id="userName">Citizen</b><small>Public account</small></div></div>
+      <button id="logout" class="logout">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-copy"><span class="eyebrow">CIVICCARE AI</span><h1 id="pageTitle">Public urban overview</h1></div>
+      <div class="topbar-actions"><span class="status-dot"><i></i> Intelligence online</span><div class="user-chip"><span id="topAvatar">C</span><b id="topName">Citizen</b></div></div>
+    </header>
+    <div id="content"></div>
+  </main>
+</section>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/static/app.js?v=5.3.0"></script>
+</body>
+</html>
